@@ -3,9 +3,8 @@ import PhotoSwipe from 'photoswipe/dist/photoswipe'
 import PhotoSwipeUI_Default from 'photoswipe/dist/photoswipe-ui-default'
 let $preview
 var vuePhotoPreview ={
-	install (Vue,opts) {
+	install (Vue) {
         const Preview = Vue.extend(previewComponent)
-        var opts=opts||{}
         if (!$preview) {
             $preview = new Preview({el: document.createElement('div')})
 			document.body.appendChild($preview.$el)
@@ -19,22 +18,22 @@ var vuePhotoPreview ={
 			}
 		}
 		Vue.mixin({
-			data(){
-				return {
-					galleryElements:null
-				}
-			},
+			// data(){
+			// 	return {
+			// 		galleryElements:null
+			// 	}
+			// },
 			methods:{
-				$previewRefresh(){
-					setTimeout(() => {
-						this.galleryElements = document.querySelectorAll('img[preview]');
-						for(var i = 0, l = this.galleryElements.length; i < l; i++) {
-							this.galleryElements[i].setAttribute('data-pswp-uid', i + 1);
-							this.galleryElements[i].onclick = this.onThumbnailsClick;
-						}
-					}, 200);
+				// $previewRefresh(){
+				// 	setTimeout(() => {
+				// 		this.galleryElements = document.querySelectorAll('img[preview]');
+				// 		for(var i = 0, l = this.galleryElements.length; i < l; i++) {
+				// 			this.galleryElements[i].setAttribute('data-pswp-uid', i + 1);
+				// 			this.galleryElements[i].onclick = this.onThumbnailsClick;
+				// 		}
+				// 	}, 200);
 					
-				},
+				// },
 				onThumbnailsClick(e) {
 					e = e || window.event;
 					e.preventDefault ? e.preventDefault() : e.returnValue = false;
@@ -45,23 +44,24 @@ var vuePhotoPreview ={
 					var thumbElements;
 					var group = eTarget.getAttribute('preview')
 					if(group) {
-						thumbElements = document.querySelectorAll('img[preview="' + group + '"]')
+						// thumbElements = document.querySelectorAll('img[preview="' + group + '"]')
+						thumbElements = document.querySelectorAll(`img[preview="${group}"]`)
 					} else {
 						thumbElements = document.querySelectorAll('img[preview]')
 					}
 					var clickedGallery = thumbElements;
 
-					var index;
+					var i = 0;
 
-					for(var i = 0; i < clickedGallery.length; i++) {
+					for(i; i < clickedGallery.length; i++) {
 						if(clickedGallery[i] === eTarget) {
-							index = i;
 							break;
 						}
 					}
-					if(index >= 0) {
-						this.openPhotoSwipe(index, clickedGallery);
-						this.$emit('preview-open',e,eTarget.src)
+					if(i >= 0) {
+						console.log(i)
+						this.openPhotoSwipe(i, clickedGallery);
+						// this.$emit('preview-open',e,eTarget.src)
 					}
 					return false;
 				},
@@ -74,13 +74,17 @@ var vuePhotoPreview ={
 					var items = await this.parseThumbnailElements(galleryElement);
 					options = {
 
-						//galleryUID: galleryElement.getAttribute('data-pswp-uid'),
+						galleryUID: galleryElement[index].getAttribute('data-pswp-uid'),
 
-						getThumbBoundsFn: function() {
-							var thumbnail = items[index].el,
+						getThumbBoundsFn: function(index) {
+							console.log(index)
+							console.log(items)
+							console.log(galleryElement)
+							var thumbnail = galleryElement[index],
 								pageYScroll = window.pageYOffset || document.documentElement.scrollTop,
 								rect = thumbnail.getBoundingClientRect();
-								console.log(rect)
+							console.log(thumbnail)
+							console.log(rect)
 							return {
 								x: rect.left,
 								y: rect.top + pageYScroll,
@@ -89,26 +93,28 @@ var vuePhotoPreview ={
 							
 						},
 
-						addCaptionHTMLFn: function(item, captionEl, isFake) {
-							if(!item.title) {
-								captionEl.children[0].innerText = '';
-								return false;
-							}
-							captionEl.children[0].innerHTML = item.title ;
-							return true;
-						},
+						// addCaptionHTMLFn: function(item, captionEl, isFake) {
+						// 	if(!item.title) {
+						// 		captionEl.children[0].innerText = '';
+						// 		return false;
+						// 	}
+						// 	captionEl.children[0].innerHTML = item.title ;
+						// 	return true;
+						// },
 						showHideOpacity:true,
+						// getThumbBoundsFn:false,
 						history:false,
 						shareEl:false,
-						maxSpreadZoom:4,
+						// maxSpreadZoom:4,
 						getDoubleTapZoom:function(isMouseClick, item){
 							if(isMouseClick) {
-								
-								return 4;
-						
+								return 1.5;
 							} else {
 								return item.initialZoomLevel < 0.7 ? 1 : 1.5;
 							}
+							// if(isMouseClick) {
+							// 	return 1.5;
+							// }
 						}
 
 					};
@@ -134,7 +140,7 @@ var vuePhotoPreview ={
 					if(isNaN(options.index)) {
 						return;
 					}
-					options=this.extend(options,opts)
+					// options=this.extend(options,opts)
 
 					if(disableAnimation) {
 						options.showAnimationDuration = 0;
@@ -145,30 +151,30 @@ var vuePhotoPreview ={
 					Vue.prototype.$preview.self=gallery
 					// see: http://photoswipe.com/documentation/responsive-images.html
 					var realViewportWidth,
-						useLargeImages = false,
+						useLargeImages = true,
 						firstResize = true,
-						imageSrcWillChange;
+						imageSrcWillChange = true;
 
 					gallery.listen('beforeResize', function() {
 
-						var dpiRatio = window.devicePixelRatio ? window.devicePixelRatio : 1;
-						dpiRatio = Math.min(dpiRatio, 2.5);
-						realViewportWidth = gallery.viewportSize.x * dpiRatio;
+						// var dpiRatio = window.devicePixelRatio ? window.devicePixelRatio : 1;
+						// dpiRatio = Math.min(dpiRatio, 2.5);
+						// realViewportWidth = gallery.viewportSize.x * dpiRatio;
 
-						if(realViewportWidth >= 1200 || (!gallery.likelyTouchDevice && realViewportWidth > 800) || screen.width > 1200) {
-							if(!useLargeImages) {
-								useLargeImages = true;
-								imageSrcWillChange = true;
-							}
+						// if(realViewportWidth >= 1200 || (!gallery.likelyTouchDevice && realViewportWidth > 800) || screen.width > 1200) {
+						// 	if(!useLargeImages) {
+						// 		useLargeImages = true;
+						// 		imageSrcWillChange = true;
+						// 	}
 
-						} else {
-							if(useLargeImages) {
-								useLargeImages = false;
-								imageSrcWillChange = true;
-							}
-						}
+						// } else {
+						// 	if(useLargeImages) {
+						// 		useLargeImages = false;
+						// 		imageSrcWillChange = true;
+						// 	}
+						// }
 
-						if(imageSrcWillChange && !firstResize) {
+						if(!firstResize) {
 							gallery.invalidateCurrItems();
 						}
 
@@ -176,24 +182,26 @@ var vuePhotoPreview ={
 							firstResize = false;
 						}
 
-						imageSrcWillChange = false;
+						// imageSrcWillChange = false;
 
 					});
 
 					gallery.listen('gettingData', function(index, item) {
 						if(item.el.getAttribute('large')) {
-							item.src = item.o.src;
+							// item.src = item.src;
+							// item.msrc = item.msrc;
 							item.w = item.o.w;
 							item.h = item.o.h;
 						} else {
-							item.src = item.m.src;
-							item.w = item.m.w;
-							item.h = item.m.h;
+							// item.src = item.src
+							// item.msrc = item.msrc
+							item.w = item.w
+							item.h = item.h
 						}
 					});
 					gallery.listen(eventName,eventCallback)
 					gallery.init();
-					$preview.$el.classList=$preview.$el.classList+' pswp--zoom-allowed'
+					// $preview.$el.classList=$preview.$el.classList+' pswp--zoom-allowed'
 				},
 				parseThumbnailElements(thumbElements) {
 					return new Promise(resolve=>{
@@ -202,6 +210,7 @@ var vuePhotoPreview ={
 							load = 0,
 							item;
 							item = {}
+						var count=0
 						for(var i = 0; i < thumbElements.length; i++) {
 							el = thumbElements[i];
 
@@ -209,9 +218,7 @@ var vuePhotoPreview ={
 							if(el.nodeType !== 1) {
 								continue;
 							}
-
-
-							if(typeof el.naturalWidth == "undefined") {　　 // IE 6/7/8
+							if(typeof el.naturalWidth === "undefined") {　　 // IE 6/7/8
 								　　
 								var i = new Image();　　
 								i.src = el.src;　　
@@ -223,9 +230,10 @@ var vuePhotoPreview ={
 								var rh = el.naturalHeight;
 							}
 							getImage(i)
-							var count=0
+							
 							function getImage(index){
 								var l=new Image()
+								l.msrc = el.getAttribute('src')
 								l.src=el.getAttribute('large')?el.getAttribute('large'):el.getAttribute('src')
 								l.text=el.getAttribute('preview-text')
 								l.author=el.getAttribute('data-author')
@@ -234,6 +242,7 @@ var vuePhotoPreview ={
 										title: l.text,
 										el: el,
 										src: l.src,
+										msrc: l.msrc,
 										w: rw,
 										h: rh,
 										author: l.author,
@@ -251,7 +260,6 @@ var vuePhotoPreview ={
 									items[index]=item
 									count++
 									if(count==thumbElements.length){
-										console.log(items)
 										resolve(items)
 									}
 								}
@@ -260,9 +268,6 @@ var vuePhotoPreview ={
 
 						}
 					})
-					
-					return items
-
 				},
 				extend(o1, o2) {
 					for (var prop in o2) {
@@ -271,10 +276,10 @@ var vuePhotoPreview ={
 					return o1
 				},
 				init(gallerySelector){
-					this.galleryElements = document.querySelectorAll(gallerySelector);
-					for(var i = 0, l = this.galleryElements.length; i < l; i++) {
-						this.galleryElements[i].setAttribute('data-pswp-uid', i + 1);
-						this.galleryElements[i].onclick = this.onThumbnailsClick;
+					var galleryElements = document.querySelectorAll(gallerySelector);
+					for(var i = 0, l = galleryElements.length; i < l; i++) {
+						galleryElements[i].setAttribute('data-pswp-uid', i + 1);
+						galleryElements[i].onclick = this.onThumbnailsClick;
 					}
 					
 				}

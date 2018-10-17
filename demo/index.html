@@ -13,6 +13,10 @@
 				width: 44%;
 				margin: 2%;
 			}
+			.item3 img{
+				max-width: 100%;
+				height: auto;
+			}
 		</style>
 	</head>
 	
@@ -21,7 +25,7 @@
 				<!--单个-->
 				<p>单个</p>
 				<div class="item">
-					<img v-for="item in img1" :src="item" preview="1" preview-text="描述文字">
+					<img src="1.jpg" preview="1" preview-text="描述文字">
 				</div>
 				<!--分组-->
 				<p>分组</p>
@@ -31,8 +35,8 @@
 				</div>
 
 				<p>大图</p>
-				<div class="item2">
-					<img src="xxx.jpg" large="xxx_3x.jpg" preview="2" preview-text="描述文字">
+				<div class="item3">
+					<img src="xxx.jpg" preview="3" preview-text="描述文字" large="xxx_3x.jpg">
 				</div>
 		</div>
 		
@@ -53,10 +57,10 @@
 				},
 				mounted:function(){
 					//异步插入的图片
-					setTimeout(() => {
-						vm.img1.push('1.jpg')
-						vm.$previewRefresh()
-					}, 2000);
+					// setTimeout(() => {
+					// 	vm.img1.push('1.jpg')
+					// 	vm.$previewRefresh()
+					// }, 2000);
 
 					//图片查看器打开后，打印本次查看器的实例（事件、方法、属性的示例）
 					this.$preview.on('imageLoadComplete',(e,item)=>{
